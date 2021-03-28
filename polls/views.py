@@ -5,6 +5,7 @@ from .models import Question, Choice
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.views import generic
+from django.utils import timezone
 
 
 class IndexView(generic.ListView):
@@ -39,3 +40,13 @@ def vote(request, question_id):
         selected.votes += 1
         selected.save()
         return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
+
+
+def get_queryset(self):
+    """
+    Return the last five published questions (not including those set to be
+    published in the future).
+    """
+    return Question.objects.filter(
+        pub_date__lte=timezone.now()
+    ).order_by('-pub_date')[:5]
